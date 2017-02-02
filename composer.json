@@ -1,5 +1,5 @@
 {
-    "name": "fuel_acl",
+    "name": "acl/acl",
     "description": "FuelPHP 1.9 Acl Package",
     "type": "fuel-package",
     "homepage": "https://github.com/atabak/acl.git",
