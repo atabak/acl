@@ -8,5 +8,6 @@ add acl to config file for always load package
 
 
 get current user id : \Acl\Acl::current_user_id();
+
 check user access to module/controller/action : \Acl\Acl::is_access('module name', 'controller name', 'action name');
 
