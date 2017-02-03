@@ -74,7 +74,6 @@ class Model_Profile extends \Orm\Model
 
     public function _event_before_insert()
     {
-        $this->customs_id = $this->customs_id ? (int) $this->customs_id : null;
         $this->user_id    = (int) $this->user_id;
         $this->created_at = \Myclasses\FNC::currentdbtime();
         $this->created_by = \Acl\Acl::current_user_id();
@@ -82,7 +81,6 @@ class Model_Profile extends \Orm\Model
 
     public function _event_before_update()
     {
-        $this->customs_id = $this->customs_id ? (int) $this->customs_id : null;
         $this->updated_at = \Myclasses\FNC::currentdbtime();
         $this->updated_by = \Acl\Acl::current_user_id();
     }
