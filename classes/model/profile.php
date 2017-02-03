@@ -14,7 +14,6 @@ class Model_Profile extends \Orm\Model
      * @property string $last
      * @property string $pic
      * @property string $cell
-     * @property integer $customs_id
      * @property string $created_at
      * @property string $created_by
      * @property string $updated_at
@@ -37,7 +36,6 @@ class Model_Profile extends \Orm\Model
         'last',
         'pic',
         'cell',
-        'customs_id',
         'created_at',
         'created_by',
         'updated_at',
@@ -67,11 +65,6 @@ class Model_Profile extends \Orm\Model
         'unlock'  => array(
             'key_from' => 'unlocked_by',
             'model_to' => '\\Acl\\Model_User',
-            'key_to'   => 'id'
-        ),
-        'customs' => array(
-            'key_from' => 'customs_id',
-            'model_to' => '\\Customs\\Model_Customs',
             'key_to'   => 'id'
         ),
     );
