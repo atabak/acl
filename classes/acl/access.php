@@ -16,6 +16,10 @@ class Access
         $action     = Model_Access_Action::query()
                 ->where('user_id', $user_id)
                 ->delete();
+        \Cache::delete('menu.module_'.$user_id);
+        \Cache::delete('menu.controller_'.$user_id);
+        \Cache::delete('menu.action_'.$user_id);
+        return true;
     }
 
     // set user access[new]
