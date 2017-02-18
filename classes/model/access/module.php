@@ -5,8 +5,19 @@ namespace Acl;
 class Model_Module extends \Orm\Model
 {
 
+    /**
+     * @property integer                        $id
+     * @property string                         $name
+     * @property string                         $url
+     * @property integer                        $order
+     * @property string                         $icon
+     * @property string                         $color
+     * @property bool                           $is_active
+     * @property \\Acl\\Model_Controller        $controlles
+     * @property \\Acl\\Model_Access_Module     $access
+     */
     protected static $_table_name = 'acl_users_modules';
-    protected static $_properties = [
+    protected static $_properties = array(
         'id',
         'name',
         'url',
@@ -14,23 +25,23 @@ class Model_Module extends \Orm\Model
         'icon',
         'color',
         'is_active'
-    ];
-    protected static $_has_many   = [
-        'controlles' => [
+    );
+    protected static $_has_many   = array(
+        'controlles' => array(
             'key_from'       => 'id',
             'model_to'       => 'Model_Controller',
             'key_to'         => 'module_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ],
-        'access'     => [
+        ),
+        'access'     => array(
             'key_from'       => 'id',
             'model_to'       => 'Model_Access_Module',
             'key_to'         => 'module_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ],
-    ];
+        ),
+    );
 
     public static function current_order()
     {

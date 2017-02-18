@@ -1,12 +1,9 @@
 Dont use for production
 
 for fuelphp 1.8 and 1.9 dev
-
-composer require acl/acl
-
-
+craete new directory in package folder : acl
+copy all file to package/acl/
 run migration for create database table
-
 add acl to config file for always load package
 
 

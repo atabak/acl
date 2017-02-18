@@ -7,18 +7,11 @@ class Access
 
     public static function del_access($user_id)
     {
-        $module     = Model_Access_Module::query()
-                ->where('user_id', $user_id)
-                ->delete();
-        $controller = Model_Access_Controller::query()
-                ->where('user_id', $user_id)
-                ->delete();
-        $action     = Model_Access_Action::query()
-                ->where('user_id', $user_id)
-                ->delete();
-        \Cache::delete('menu.module_'.$user_id);
-        \Cache::delete('menu.controller_'.$user_id);
-        \Cache::delete('menu.action_'.$user_id);
+        Model_Access_Module::query()->where('user_id', $user_id)->delete();
+        Model_Access_Controller::query()->where('user_id', $user_id)->delete();
+        Model_Access_Action::query()->where('user_id', $user_id)->delete();
+        //\Cache::delete('menu.'.$user_id);
+        \Cache::delete_all('menu.'.$user_id);
         return true;
     }
 

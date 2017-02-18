@@ -9,22 +9,22 @@ class Create_acl_users_modules
 
     public function up()
     {
-        \DBUtil::create_table($this->table, array(
-            'id'        => array('type' => 'int', 'auto_increment' => true),
-            'name'      => array('constraint' => 512, 'type' => 'varchar'),
-            'url'       => array('constraint' => 256, 'type' => 'varchar'),
-            'order'     => array('type' => 'int'),
-            'icon'      => array('constraint' => 45, 'type' => 'varchar'),
-            'color'     => array('constraint' => 45, 'type' => 'varchar', 'null' => true),
-            'is_active' => array('type' => 'bool', 'default' => 1),
-                ), array('id'), true, false, false);
-        \DBUtil::create_index($this->table, 'url', 'url');
-        \DBUtil::create_index($this->table, 'order', 'order');
-        \DBUtil::create_index($this->table, 'is_active', 'is_active');
+        \DBUtil::create_table($this->table, [
+            'id'        => ['type' => 'int', 'AUTO_INCREMENT' => true],
+            'name'      => ['constraint' => 512, 'type' => 'varchar'],
+            'url'       => ['constraint' => 256, 'type' => 'varchar'],
+            'order'     => ['type' => 'int'],
+            'icon'      => ['constraint' => 45, 'type' => 'varchar'],
+            'color'     => ['constraint' => 45, 'type' => 'varchar', 'null' => true],
+            'is_active' => ['type' => 'bool', 'default' => false],
+                ], ['id'], true, false, false);
+        \DBUtil::create_index($this->table, 'url', 'acl_users_modules_url');
+        \DBUtil::create_index($this->table, 'order', 'acl_users_modules_order');
+        \DBUtil::create_index($this->table, 'is_active', 'acl_users_modules_is_active');
         \DB::insert()
                 ->table($this->table)
-                ->columns(array('name', 'url', 'order', 'icon', 'color', 'is_active'))
-                ->values(array(array('مدیریت کاربران', 'dashboard/users', 1000, 'fa-user', '', 1)))
+                ->columns(['name', 'url', 'order', 'icon', 'color', 'is_active'])
+                ->values([['مدیریت کاربران', 'dashboard/users', 1000, 'fa-user', '', true]])
                 ->execute();
     }
 

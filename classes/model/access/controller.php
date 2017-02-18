@@ -6,39 +6,39 @@ class Model_Controller extends \Orm\Model
 {
 
     protected static $_table_name = 'acl_users_modules_controller';
-    protected static $_properties = [
+    protected static $_properties = array(
         'id',
         'module_id',
         'name',
         'url',
         'order',
         'is_active'
-    ];
-    protected static $_belongs_to = [
-        'module' => [
+    );
+    protected static $_belongs_to = array(
+        'module' => array(
             'key_from'       => 'module_id',
             'model_to'       => 'Model_Module',
             'key_to'         => 'id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ]
-    ];
-    protected static $_has_many   = [
-        'actions' => [
+        )
+    );
+    protected static $_has_many   = array(
+        'actions' => array(
             'key_from'       => 'id',
             'model_to'       => 'Model_Actions',
             'key_to'         => 'controller_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ],
-        'access'  => [
+        ),
+        'access'  => array(
             'key_from'       => 'id',
             'model_to'       => 'Model_Access_Controller',
             'key_to'         => 'controller_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ],
-    ];
+        ),
+    );
 
     // check uniq name in module
     public static function duplicate_check($module_id, $controller, $id = null)

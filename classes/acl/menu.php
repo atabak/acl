@@ -14,7 +14,7 @@ class Menu
                 ->join(array(Model_Access_Module::table(), 'a'), 'inner')
                 ->on('m.id', '=', 'a.module_id')
                 ->where('a.user_id', $current_user)
-                ->cached(2592000, 'menu.module_'.$current_user)
+                ->cached(2592000, 'menu.'.$current_user.'.module')
                 ->order_by('m.order', 'ASC')
                 ->execute();
         $side         = 'left';
@@ -22,7 +22,6 @@ class Menu
         {
             foreach ($modules as $module)
             {
-                var_dump($module);
                 $module_active = false;
                 if ($module && (str_replace('dashboard/', '', $module['url']) == $active_module))
                 {
@@ -38,8 +37,9 @@ class Menu
                         ->join(array(Model_Access_Controller::table(), 'a'), 'inner')
                         ->on('a.controller_id', '=', 'c.id')
                         ->where('a.user_id', '=', $current_user)
+                        ->where('c.module_id', '=', $module['id'])
                         ->order_by('c.order', 'asc')
-                        ->cached(2592000, 'menu.controller_'.$current_user)
+                        ->cached(2592000, 'menu.'.$current_user.'.controller_'.$module['id'])
                         ->execute();
                 if ($controllers)
                 {
@@ -60,7 +60,7 @@ class Menu
                                 ->on('s.action_id', '=', 'a.id')
                                 ->where('a.controller_id', $controller['id'])
                                 ->where('s.user_id', $current_user)
-                                ->cached(2592000, 'menu.action_'.$current_user)
+                                ->cached(2592000, 'menu.'.$current_user.'.action_'.$controller['id'])
                                 ->order_by('a.order', 'asc')
                                 ->execute();
                         if ($actions)

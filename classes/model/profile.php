@@ -14,6 +14,7 @@ class Model_Profile extends \Orm\Model
      * @property string $last
      * @property string $pic
      * @property string $cell
+     * @property integer $customs_id
      * @property string $created_at
      * @property string $created_by
      * @property string $updated_at
