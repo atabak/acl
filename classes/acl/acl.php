@@ -7,11 +7,13 @@ class Acl
 
     public $driver;
 
-    public static function forge($config = array())
+    public static function forge($config = [])
     {
         static $instance = null;
-        if ($instance === null) {
-            $config           = array_merge(\Config::get('acl', array()), $config);
+
+        if ($instance === null)
+        {
+            $config           = array_merge(\Config::get('acl', []), $config);
             $instance         = new static;
             $instance->driver = new Driver($config);
         }
@@ -40,9 +42,11 @@ class Acl
 
     public static function login($username_or_email, $password, $remember = false)
     {
-        if (empty($username_or_email) || empty($password)) {
+        if (empty($username_or_email) || empty($password))
+        {
             return false;
         }
+
         return static::driver()->authenticate_user($username_or_email, $password, $remember);
     }
 
@@ -63,8 +67,8 @@ class Acl
 
     public static function generate_token()
     {
-        $token = join(':', array(\Str::random('alnum', 15), time()));
-        return str_replace(array('+', '/', '=', 'l', 'I', 'O', '0'), array('p', 'q', 'r', 's', 'x', 'y', 'z'), base64_encode($token));
+        $token = join(':', [\Str::random('alnum', 15), time()]);
+        return str_replace(['+', '/', '=', 'l', 'I', 'O', '0'], ['p', 'q', 'r', 's', 'x', 'y', 'z'], base64_encode($token));
     }
 
     public static function password_hash($password)

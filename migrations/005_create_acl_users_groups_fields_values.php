@@ -17,13 +17,7 @@ class Create_acl_users_groups_fields_values
             'created_at' => ['type' => 'int'],
             'created_by' => ['type' => 'int'],
                 ], ['id'], true, false, false);
-        \DBUtil::create_index($this->table, 'user_id', 'acl_users_groups_fields_values_user_id');
-        \DBUtil::create_index($this->table, 'field_id', 'acl_users_groups_fields_values_field_id');
-        \DBUtil::create_index($this->table, 'created_by', 'acl_users_groups_fields_values_created_by');
-        \DBUtil::create_index($this->table, 'value', 'acl_users_groups_fields_values_value');
-        \DBUtil::add_foreign_key($this->table, ['key' => 'user_id', 'reference' => ['table' => 'acl_users', 'column' => 'id',], 'on_delete' => 'CASCADE']);
-        \DBUtil::add_foreign_key($this->table, ['key' => 'field_id', 'reference' => ['table' => 'acl_users_groups_fields', 'column' => 'id'], 'on_delete' => 'CASCADE']);
-        \DBUtil::add_foreign_key($this->table, ['key' => 'created_by', 'reference' => ['table' => 'acl_users', 'column' => 'id']]);
+       
     }
 
     public function down()

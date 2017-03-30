@@ -11,7 +11,7 @@ class Driver
 
     public function __construct(array $config = null)
     {
-        $this->config  = $config;
+        $this->config  = \Config::load('acl');
         $this->session = \Session::instance();
         //$this->is_login();
     }
@@ -23,8 +23,16 @@ class Driver
     public function is_login()
     {
         $user_id = $this->session->get('acl.user.id');
+
         if (empty($user_id))
         {
+            $autologin = $this->auto_login();
+
+            if ($autologin[1])
+            {
+                return true;
+            }
+
             return false;
         }
         else
@@ -36,8 +44,11 @@ class Driver
             else
             {
                 $this->user = null;
-                $user       = Model_User::find($user_id);
+
+                $user = Model_User::find($user_id);
+
                 $this->set_user($user);
+
                 return true;
             }
         }
@@ -54,28 +65,34 @@ class Driver
     public function authenticate_user($username_or_email, $password, $remember)
     {
         $user = Model_User::authenticate($username_or_email);
+
         if ($user[1])
         {
             $user = $user[0];
+
             if (password_verify($password, $user->password))
             {
-                if ($remember === true)
+                if ($remember)
                 {
                     $user->remember = self::generate_token();
-                    \Cookie::set($this->config['rememberable']['key'], $user->remember_token, $this->config['rememberable']['ttl'], null, null, null, true);
+                    \Cookie::set($this->config['rememberable']['key'], $user->remember, $this->config['rememberable']['ttl'], null, null, null, true);
                 }
+
                 if ($this->complete_login($user))
                 {
                     return 'ok';
                 }
+
                 return 'no';
             }
             else
             {
                 $user->update_attempts();
+
                 return 'password';
             }
         }
+
         return $user[0];
     }
 
@@ -86,15 +103,20 @@ class Driver
      */
     public function auto_login()
     {
-        if (($token = \Cookie::get($this->config['rememberable']['key'])))
+        $token = \Cookie::get($this->config['rememberable']['key']);
+
+        if ($token)
         {
-            $user = \Model_User::authenticatebyremember($token);
+            $user = Model_User::authenticatebyremember($token);
+
             if ($user)
             {
                 $this->complete_login($user);
+
                 return true;
             }
         }
+
         return false;
     }
 
@@ -107,8 +129,10 @@ class Driver
     {
         // remove user attampt
         $user->after_login();
+
         // set user login
         $this->set_user($user);
+
         return true;
     }
 
@@ -119,7 +143,9 @@ class Driver
     public function set_user(Model_User $user)
     {
         $this->session->set('acl.user.id', $user->id);
+
         //$this->session->rotate();
+
         $this->user = $user;
     }
 
@@ -156,6 +182,7 @@ class Driver
         {
             return $this->user->id;
         }
+
         return false;
     }
 
@@ -168,11 +195,15 @@ class Driver
     {
         // run after logout function
         $this->user = null;
+
         $this->session->delete('acl.user.id');
+
         if ($destroy === true)
         {
             $this->session->destroy();
+
             $cookie_key = $this->config['rememberable']['key'];
+
             if (\Cookie::get($cookie_key))
             {
                 \Cookie::delete($cookie_key);
@@ -182,6 +213,7 @@ class Driver
         {
             $this->session->rotate();
         }
+
         return !$this->is_login();
     }
 
@@ -191,8 +223,9 @@ class Driver
      */
     public static function generate_token()
     {
-        $token = join(':', array(\Str::random('alnum', 15), time()));
-        return str_replace(array('+', '/', '=', 'l', 'I', 'O', '0'), array('p', 'q', 'r', 's', 'x', 'y', 'z'), base64_encode($token));
+        $token = join(':', [\Str::random('alnum', 15), time()]);
+
+        return str_replace(['+', '/', '=', 'l', 'I', 'O', '0'], ['p', 'q', 'r', 's', 'x', 'y', 'z'], base64_encode($token));
     }
 
     /**
@@ -227,6 +260,7 @@ class Driver
                 ->and_where_close()
                 // count access
                 ->count();
+
         return $access_user ? true : false;
     }
 
@@ -240,31 +274,64 @@ class Driver
      */
     public function set_access($user_id, $modules, $controllers, $actions)
     {
+
         // delete current user modules
-        Model_Access_Module::query()->where('user_id', $user_id)->delete();
+        Model_Access_Module::query()
+                ->where('user_id', $user_id)
+                ->delete();
+
+
         // delete current user controllers
-        Model_Access_Controller::query()->where('user_id', $user_id)->delete();
+        Model_Access_Controller::query()
+                ->where('user_id', $user_id)
+                ->delete();
+
+
         // delete current user actions
-        Model_Access_Action::query()->where('user_id', $user_id)->delete();
-        $new_modules = \DB::insert()->table(Model_Access_Module::table())->columns(['user_id', 'module_id']);
+        Model_Access_Action::query()
+                ->where('user_id', $user_id)
+                ->delete();
+
+
+        $new_modules = \DB::insert()
+                ->table(Model_Access_Module::table())
+                ->columns(['user_id', 'module_id']);
+
         foreach ($modules as $module)
         {
             $new_modules->values([$user_id, $module]);
         }
+
         $new_modules->execute();
-        $new_controllers = \DB::insert()->table(Model_Access_Controller::table())->columns(['user_id', 'controller_id']);
+
+        $new_controllers = \DB::insert()
+                ->table(Model_Access_Controller::table())
+                ->columns(['user_id', 'controller_id']);
+
         foreach ($controllers as $controller)
         {
             $new_controllers->values([$user_id, $controller]);
         }
+
         $new_controllers->execute();
-        $new_actions = \DB::insert()->table(Model_Access_Action::table())->columns(['user_id', 'action_id']);
+
+        $new_actions = \DB::insert()
+                ->table(Model_Access_Action::table())
+                ->columns(['user_id', 'action_id']);
+
         foreach ($actions as $action)
         {
             $new_actions->values([$user_id, $action]);
         }
+
         $new_actions->execute();
+
         return true;
+    }
+
+    public function forgetPass($email)
+    {
+        
     }
 
 }

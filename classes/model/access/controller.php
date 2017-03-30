@@ -6,39 +6,39 @@ class Model_Controller extends \Orm\Model
 {
 
     protected static $_table_name = 'acl_users_modules_controller';
-    protected static $_properties = array(
+    protected static $_properties = [
         'id',
         'module_id',
         'name',
         'url',
         'order',
         'is_active'
-    );
-    protected static $_belongs_to = array(
-        'module' => array(
+    ];
+    protected static $_belongs_to = [
+        'module' => [
             'key_from'       => 'module_id',
             'model_to'       => 'Model_Module',
             'key_to'         => 'id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        )
-    );
-    protected static $_has_many   = array(
-        'actions' => array(
+        ]
+    ];
+    protected static $_has_many   = [
+        'actions' => [
             'key_from'       => 'id',
             'model_to'       => 'Model_Actions',
             'key_to'         => 'controller_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ),
-        'access'  => array(
+        ],
+        'access'  => [
             'key_from'       => 'id',
             'model_to'       => 'Model_Access_Controller',
             'key_to'         => 'controller_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ),
-    );
+        ],
+    ];
 
     // check uniq name in module
     public static function duplicate_check($module_id, $controller, $id = null)
@@ -46,7 +46,8 @@ class Model_Controller extends \Orm\Model
         $result = static::query()
                 ->where('module_id', $module_id)
                 ->where('name', $controller);
-        if ($id) {
+        if ($id)
+        {
             $result->where('id', '!=', $id);
         }
         $duplicate = $result->get_one();

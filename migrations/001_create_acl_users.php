@@ -10,21 +10,21 @@ class Create_acl_users
     public function up()
     {
         \DBUtil::create_table($this->table, [
-            'id'         => ['type' => 'int', 'AUTO_INCREMENT' => true],
-            'username'   => ['constraint' => 256, 'type' => 'varchar'],
-            'email'      => ['constraint' => 256, 'type' => 'varchar', 'null' => true],
-            'password'   => ['constraint' => 512, 'type' => 'varchar'],
-            'group_id'   => ['type' => 'int'],
-            'is_active'  => ['type' => 'bool', 'default' => false],
-            'is_confirm' => ['type' => 'bool', 'default' => false],
-            'unsuccess'  => ['type' => 'int', 'default' => 0],
-            'remember'   => ['constraint' => 512, 'type' => 'varchar', 'default' => ''],
-            'is_locked'  => ['type' => 'bool', 'default' => false],
-            'lock_at'    => ['type' => 'int', 'default' => 0],
+            'id'          => ['type' => 'int', 'AUTO_INCREMENT' => true],
+            'username'    => ['type' => 'varchar', 'constraint' => 256],
+            'email'       => ['type' => 'varchar', 'constraint' => 256, 'null' => true],
+            'password'    => ['type' => 'varchar', 'constraint' => 512],
+            'group_id'    => ['type' => 'int'],
+            'is_active'   => ['type' => 'smallint', 'default' => 0, 'null' => true],
+            'is_confirm'  => ['type' => 'smallint', 'default' => 0, 'null' => true],
+            'unsuccess'   => ['type' => 'int', 'default' => 0, 'null' => true],
+            'remember'    => ['constraint' => 512, 'type' => 'varchar', 'null' => true],
+            'remember_at' => ['type' => 'int', 'null' => true],
+            'is_locked'   => ['type' => 'smallint', 'default' => 0],
+            'forget_code' => ['constraint' => 512, 'type' => 'varchar', 'null' => true],
+            'forget_at'   => ['type' => 'int', 'null' => true],
+            'lock_at'     => ['type' => 'int', 'default' => 0, 'null' => true],
                 ], ['id'], true, false, false);
-        \DBUtil::create_index($this->table, 'username', 'acl_usersr_username', 'UNIQUE');
-        \DBUtil::create_index($this->table, 'email', 'acl_users_email', 'UNIQUE');
-        \DBUtil::create_index($this->table, 'group_id', 'acl_users_group_id');
     }
 
     public function down()

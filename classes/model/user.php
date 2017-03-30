@@ -6,48 +6,51 @@ class Model_User extends \Orm\Model
 {
 
     protected static $_table_name = 'acl_users';
-    protected static $_properties = array(
+    protected static $_properties = [
         'id',
         'username',
         'email',
         'password',
-        'remember',
         'group_id',
-        'is_locked',
         'is_active',
         'is_confirm',
-        'unsuccess'
-    );
-    protected static $_belongs_to = array(
-        'group' => array(
+        'unsuccess',
+        'remember',
+        'is_locked',
+        'lock_at',
+        'forget_code',
+        'forget_at'
+    ];
+    protected static $_belongs_to = [
+        'group' => [
             'key_from'       => 'group_id',
             'model_to'       => 'Model_Group',
             'key_to'         => 'id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        )
-    );
-    protected static $_has_one    = array(
-        'profile' => array(
+        ]
+    ];
+    protected static $_has_one    = [
+        'profile' => [
             'key_from'       => 'id',
             'model_to'       => 'Model_Profile',
             'key_to'         => 'user_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ),
-    );
-    protected static $_has_many   = array(
-        'values' => array(
+        ],
+    ];
+    protected static $_has_many   = [
+        'values' => [
             'key_from'       => 'id',
             'model_to'       => 'Model_Group_Field_Values',
             'key_to'         => 'user_id',
             'cascade_save'   => true,
             'cascade_delete' => false
-        ),
-    );
-    protected static $_observers  = array(
-        'Orm\\Observer_Self' => array('events' => array('before_insert', 'before_update')),
-    );
+        ],
+    ];
+    protected static $_observers  = [
+        'Orm\\Observer_Self' => ['events' => ['before_insert', 'before_update']],
+    ];
 
     public function _event_before_insert()
     {
@@ -90,29 +93,29 @@ class Model_User extends \Orm\Model
                 // banned user
                 if (!$user->is_unlock())
                 {
-                    return array('locked', false);
+                    return ['locked', false];
                 }
                 // user not active yet
                 if ($user->is_unactive())
                 {
-                    return array('not_active', false);
+                    return ['not_active', false];
                 }
                 // user not confirm yet
                 if ($user->is_unconfirm())
                 {
-                    return array('not_confirm', false);
+                    return ['not_confirm', false];
                 }
                 // user connfirm, active, not banned
                 // so send user object
-                return array($user, true);
+                return [$user, true];
             }
             else
             {
                 // user not find
-                return array('username', false);
+                return ['username', false];
             }
         }
-        return array('empty', false);
+        return ['empty', false];
     }
 
     /**
@@ -125,8 +128,6 @@ class Model_User extends \Orm\Model
         // check for not empty userremember key
         if (!empty($remember_key))
         {
-
-
             // search for user by remember key
             $user = static::query()
                     ->where('remember', $remember_key)
@@ -135,32 +136,40 @@ class Model_User extends \Orm\Model
             // find user
             if ($user)
             {
-                // banned user
-                if (!$user->is_unlock())
+                // check for expire
+                if ($user->remember_at < strtotime("-1 week"))
                 {
-                    return array('locked', false);
+                    // banned user
+                    if (!$user->is_unlock())
+                    {
+                        return ['locked', false];
+                    }
+                    // user not active yet
+                    if ($user->is_unactive())
+                    {
+                        return ['not_active', false];
+                    }
+                    // user not confirm yet
+                    if ($user->is_unconfirm())
+                    {
+                        return ['not_confirm', false];
+                    }
+                    // user connfirm, active, not banned
+                    // so send user object
+                    return [$user, true];
                 }
-                // user not active yet
-                if ($user->is_unactive())
+                else
                 {
-                    return array('not_active', false);
+                    return ['time', false];
                 }
-                // user not confirm yet
-                if ($user->is_unconfirm())
-                {
-                    return array('not_confirm', false);
-                }
-                // user connfirm, active, not banned
-                // so send user object
-                return array($user, true);
             }
             else
             {
                 // user not find
-                return array('username', false);
+                return ['username', false];
             }
         }
-        return array('empty', false);
+        return ['empty', false];
     }
 
     /**

@@ -11,21 +11,13 @@ class Create_acl_users_modules
     {
         \DBUtil::create_table($this->table, [
             'id'        => ['type' => 'int', 'AUTO_INCREMENT' => true],
-            'name'      => ['constraint' => 512, 'type' => 'varchar'],
-            'url'       => ['constraint' => 256, 'type' => 'varchar'],
+            'name'      => ['type' => 'varchar', 'constraint' => 512],
+            'url'       => ['type' => 'varchar', 'constraint' => 256],
             'order'     => ['type' => 'int'],
-            'icon'      => ['constraint' => 45, 'type' => 'varchar'],
-            'color'     => ['constraint' => 45, 'type' => 'varchar', 'null' => true],
-            'is_active' => ['type' => 'bool', 'default' => false],
+            'icon'      => ['type' => 'varchar', 'constraint' => 45],
+            'color'     => ['type' => 'varchar', 'constraint' => 45, 'null' => true],
+            'is_active' => ['type' => 'smallint', 'default' => 0],
                 ], ['id'], true, false, false);
-        \DBUtil::create_index($this->table, 'url', 'acl_users_modules_url');
-        \DBUtil::create_index($this->table, 'order', 'acl_users_modules_order');
-        \DBUtil::create_index($this->table, 'is_active', 'acl_users_modules_is_active');
-        \DB::insert()
-                ->table($this->table)
-                ->columns(['name', 'url', 'order', 'icon', 'color', 'is_active'])
-                ->values([['مدیریت کاربران', 'dashboard/users', 1000, 'fa-user', '', true]])
-                ->execute();
     }
 
     public function down()

@@ -5,96 +5,168 @@ namespace Acl;
 class Menu
 {
 
-    public static function create_menu($active_module = null, $active_controller = null, $active_action = null)
+    public static function getModules($current_user)
     {
-        $menu         = '';
+        try
+        {
+            $modules = \Cache::get('menu.'.$current_user.'.module');
+        }
+        catch (\CacheNotFoundException $e)
+        {
+            $moduelAccessSubQuery = Model_Access_Module::query()
+                    ->select('module_id')
+                    ->where('user_id', $current_user);
+
+            $modules = Model_Module::query()
+                    ->where('id', 'in', $moduelAccessSubQuery->get_query(false))
+                    ->order_by('order')
+                    ->get();
+            \Cache::set('menu.'.$current_user.'.module', $modules);
+        }
+        return $modules;
+    }
+
+    public static function getControllers($current_user)
+    {
+        try
+        {
+            $controllers = \Cache::get('menu.'.$current_user.'.controller');
+        }
+        catch (\CacheNotFoundException $e)
+        {
+            $controllerAccessSubQuery = Model_Access_Controller::query()
+                    ->select('controller_id')
+                    ->where('user_id', $current_user);
+
+            $controllers = Model_Controller::query()
+                    ->where('id', 'in', $controllerAccessSubQuery->get_query(false))
+                    ->order_by('order')
+                    ->get();
+            \Cache::set('menu.'.$current_user.'.controller', $controllers);
+        }
+        return $controllers;
+    }
+
+    public static function getActions($current_user)
+    {
+        try
+        {
+            $actions = \Cache::get('menu.'.$current_user.'.actions');
+        }
+        catch (\CacheNotFoundException $e)
+        {
+            $actionsAccessSubQuery = Model_Access_Action::query()
+                    ->select('action_id')
+                    ->where('user_id', $current_user);
+
+            $actions = Model_Actions::query()
+                    ->where('id', 'in', $actionsAccessSubQuery->get_query(false))
+                    ->order_by('order')
+                    ->get();
+            \Cache::set('menu.'.$current_user.'.actions', $actions);
+        }
+        return $actions;
+    }
+
+    public static function MenuCreate($active_module = null, $active_controller = null, $active_action = null)
+    {
+        $menu = '';
+
+        // define current user
         $current_user = Acl::current_user_id();
-        $modules      = \DB::select(array('m.id', 'id'), array('m.url', 'url'), array('m.name', 'name'), array('m.icon', 'icon'))
-                ->from(array(Model_Module::table(), 'm'))
-                ->join(array(Model_Access_Module::table(), 'a'), 'inner')
-                ->on('m.id', '=', 'a.module_id')
-                ->where('a.user_id', $current_user)
-                ->cached(2592000, 'menu.'.$current_user.'.module')
-                ->order_by('m.order', 'ASC')
-                ->execute();
-        $side         = 'left';
+
+        // get user modules
+        $modules = self::getModules($current_user);
+
+        // get user controllers
+        $controllers = self::getControllers($current_user);
+
+        // get user actions
+        $actions = self::getActions($current_user);
+
+        // set menu side 
+        $side = 'left';
+
         if ($modules)
         {
             foreach ($modules as $module)
             {
                 $module_active = false;
+
                 if ($module && (str_replace('dashboard/', '', $module['url']) == $active_module))
                 {
                     $module_active = true;
                 }
-                $menu        .= '<li class="'.($module_active ? 'active ' : '').'treeview">
-                            <a href="#">
-                                <i class="fa '.$module['icon'].'"></i> <span>'.$module['name'].'</span> <i class="fa fa-angle-'.$side.' pull-'.$side.'"></i>
-                            </a>
-                            <ul class="treeview-menu">';
-                $controllers = \DB::select(array('c.id', 'id'), array('c.url', 'url'), array('c.name', 'name'))
-                        ->from(array(Model_Controller::table(), 'c'))
-                        ->join(array(Model_Access_Controller::table(), 'a'), 'inner')
-                        ->on('a.controller_id', '=', 'c.id')
-                        ->where('a.user_id', '=', $current_user)
-                        ->where('c.module_id', '=', $module['id'])
-                        ->order_by('c.order', 'asc')
-                        ->cached(2592000, 'menu.'.$current_user.'.controller_'.$module['id'])
-                        ->execute();
+
+                $menu .= '<li class="'.($module_active ? 'active ' : '').'treeview">
+                                    <a href="#">
+                                        <i class="fa '.$module['icon'].'"></i> <span>'.$module['name'].'</span> <i class="fa fa-angle-'.$side.' pull-'.$side.'"></i>
+                                    </a>
+                                    <ul class="treeview-menu">';
+
+                // begin module controller [level 2]
                 if ($controllers)
                 {
                     foreach ($controllers as $controller)
                     {
-                        $controller_active = false;
-                        if ($active_controller && $controller['url'] == $active_controller && $module_active)
+                        if ($controller->module_id == $module->id)
                         {
-                            $controller_active = true;
-                        }
-                        $controller_address = \Uri::create($module['url'].'/'.$controller['url']);
-                        $menu               .= '<li class="'.($controller_active ? 'active' : '').'">
-                                        <a href="'.$controller_address.'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&ldsh;'.$controller['name'].' <i class="fa fa-angle-'.$side.' pull-'.$side.'"></i></a>
-                                        <ul class="treeview-menu">';
-                        $actions            = \DB::select(array('a.name', 'name'), array('a.uri', 'uri'), array('a.is_visible', 'is_visible'))
-                                ->from(array(Model_Actions::table(), 'a'))
-                                ->join(array(Model_Access_Action::table(), 's'), 'inner')
-                                ->on('s.action_id', '=', 'a.id')
-                                ->where('a.controller_id', $controller['id'])
-                                ->where('s.user_id', $current_user)
-                                ->cached(2592000, 'menu.'.$current_user.'.action_'.$controller['id'])
-                                ->order_by('a.order', 'asc')
-                                ->execute();
-                        if ($actions)
-                        {
-                            foreach ($actions as $action)
+                            $controller_active = false;
+
+                            if ($active_controller && $controller['url'] == $active_controller && $module_active)
                             {
-                                $action_active = false;
-                                if ($action['is_visible'])
+                                $controller_active = true;
+                            }
+
+                            $controller_address = \Uri::create($module['url'].'/'.$controller['url']);
+
+                            $menu .= '  <li class="'.($controller_active ? 'active' : '').'">
+                                            <a href="'.$controller_address.'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&ldsh;'.$controller['name'].' <i class="fa fa-angle-'.$side.' pull-'.$side.'"></i></a>
+                                            <ul class="treeview-menu">';
+                            
+                            if ($actions)
+                            {
+                                foreach ($actions as $action)
                                 {
-                                    if (!strpos($action['uri'], '/') === false)
+                                    if ($action->controller_id == $controller->id)
                                     {
-                                        $address = explode('/', $action['uri']);
-                                        if ($active_action == str_replace('.html', '', $address[count($address) - 1]) && $controller_active)
+                                        $action_active = false;
+
+                                        if ($action['is_visible'])
                                         {
-                                            $action_active = true;
+                                            if (!strpos($action['uri'], '/') === false)
+                                            {
+                                                $address = explode('/', $action['uri']);
+
+                                                if ($active_action == str_replace('.html', '', $address[count($address) - 1]) && $controller_active)
+                                                {
+                                                    $action_active = true;
+                                                }
+
+                                                $menu .= '  <li class="'.($action_active ? 'active' : '').'"><a href="'.\Uri::create($action['uri']).'" class="mtpa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&ldsh;<span class="mtp">'.$action['name'].'</span></a></li>';
+                                            }
+                                            else
+                                            {
+                                                if ($active_action == str_replace('.html', '', $action['uri']) && $controller_active)
+                                                {
+                                                    $action_active = true;
+                                                }
+
+                                                $menu .= '  <li class="'.($action_active ? 'active' : '').'"><a href="'.\Uri::create($module['url'].'/'.$controller['url'].'/'.$action['uri']).'" class="mtpa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&ldsh;<span class="mtp">'.$action['name'].'</span></a></li>';
+                                            }
                                         }
-                                        $menu .= '  <li class="'.($action_active ? 'active' : '').'"><a href="'.\Uri::create($action['uri']).'" class="mtpa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&ldsh;<span class="mtp">'.$action['name'].'</span></a></li>';
-                                    }
-                                    else
-                                    {
-                                        if ($active_action == str_replace('.html', '', $action['uri']) && $controller_active)
-                                        {
-                                            $action_active = true;
-                                        }
-                                        $menu .= '  <li class="'.($action_active ? 'active' : '').'"><a href="'.\Uri::create($module['url'].'/'.$controller['url'].'/'.$action['uri']).'" class="mtpa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&ldsh;<span class="mtp">'.$action['name'].'</span></a></li>';
                                     }
                                 }
                             }
+                            // close controller menu [level 2]
+                            $menu .= '          </ul>
+                                        </li>';
                         }
-                        $menu .= '      </ul>
-                                    </li>';
                     }
                 }
-                $menu .= '  </ul>
+
+                // close module menu
+                $menu .= '          </ul>
                         </li>';
             }
         }

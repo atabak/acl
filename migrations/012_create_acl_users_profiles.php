@@ -26,21 +26,6 @@ class Create_acl_users_profiles
             'unlocked_at' => ['type' => 'int', 'null' => true],
             'unlocked_by' => ['type' => 'int', 'null' => true],
                 ], ['id'], true, false, false);
-        \DBUtil::create_index($this->table, 'user_id', 'acl_users_profiles_user_id');
-        \DBUtil::create_index($this->table, 'created_by', 'acl_users_profiles_created_by');
-        \DBUtil::create_index($this->table, 'updated_by', 'acl_users_profiles_updated_by');
-        \DBUtil::create_index($this->table, 'confirm_by', 'acl_users_profiles_confirm_by');
-        \DBUtil::create_index($this->table, 'unlocked_by', 'acl_users_profiles_unlocked_by');
-        \DBUtil::add_foreign_key($this->table, ['key' => 'user_id', 'reference' => ['table' => 'acl_users', 'column' => 'id',], 'on_delete' => 'CASCADE']);
-        \DBUtil::add_foreign_key($this->table, ['key' => 'created_by', 'reference' => ['table' => 'acl_users', 'column' => 'id']]);
-        \DBUtil::add_foreign_key($this->table, ['key' => 'updated_by', 'reference' => ['table' => 'acl_users', 'column' => 'id']]);
-        \DBUtil::add_foreign_key($this->table, ['key' => 'confirm_by', 'reference' => ['table' => 'acl_users', 'column' => 'id']]);
-        \DBUtil::add_foreign_key($this->table, ['key' => 'unlocked_by', 'reference' => ['table' => 'acl_users', 'column' => 'id']]);
-        \DB::insert()
-                ->table($this->table)
-                ->columns(['user_id', 'first', 'last', 'cell', 'pic', 'created_at', 'created_by', 'confirm_at', 'confirm_by'])
-                ->values([[1, 'اتابک', 'حسین نیا', '09354303475', '', \Myclasses\FNC::currentdbtime(), 1, \Myclasses\FNC::currentdbtime(), 1]])
-                ->execute();
     }
 
     public function down()

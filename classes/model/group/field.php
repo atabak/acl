@@ -58,13 +58,13 @@ class Model_Group_Field extends \Orm\Model
     public function _event_before_insert()
     {
         $this->created_at = \Myclasses\FNC::currentdbtime();
-        $this->created_by = 1;
+        $this->created_by = Acl::current_user_id();
     }
 
     public function _event_before_update()
     {
         $this->updated_at = \Myclasses\FNC::currentdbtime();
-        $this->updated_by = 1;
+        $this->updated_by = Acl::current_user_id();
     }
 
     public static function is_duplicate($group_id, $label, $id = null)

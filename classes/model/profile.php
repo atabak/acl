@@ -14,7 +14,6 @@ class Model_Profile extends \Orm\Model
      * @property string $last
      * @property string $pic
      * @property string $cell
-     * @property integer $customs_id
      * @property string $created_at
      * @property string $created_by
      * @property string $updated_at
@@ -28,15 +27,13 @@ class Model_Profile extends \Orm\Model
      * @property string $editor
      * @property string $confirm
      * @property string $unlock
-     * @property string $customs
      */
-    protected static $_properties = array(
+    protected static $_properties = [
         'id',
         'user_id',
         'first',
         'last',
         'pic',
-        'cell',
         'created_at',
         'created_by',
         'updated_at',
@@ -46,32 +43,16 @@ class Model_Profile extends \Orm\Model
         'locked_at',
         'unlocked_at',
         'unlocked_by',
-    );
-    protected static $_belongs_to = array(
-        'creator' => array(
-            'key_from' => 'created_by',
-            'model_to' => '\\Acl\\Model_User',
-            'key_to'   => 'id'
-        ),
-        'editor'  => array(
-            'key_from' => 'updated_by',
-            'model_to' => '\\Acl\\Model_User',
-            'key_to'   => 'id'
-        ),
-        'confirm' => array(
-            'key_from' => 'confirm_by',
-            'model_to' => '\\Acl\\Model_User',
-            'key_to'   => 'id'
-        ),
-        'unlock'  => array(
-            'key_from' => 'unlocked_by',
-            'model_to' => '\\Acl\\Model_User',
-            'key_to'   => 'id'
-        ),
-    );
-    protected static $_observers  = array(
-        'Orm\\Observer_Self' => array('events' => array('before_insert', 'before_update')),
-    );
+    ];
+    protected static $_belongs_to = [
+        'creator' => ['key_from' => 'created_by', 'model_to' => '\\Acl\\Model_User', 'key_to' => 'id'],
+        'editor'  => ['key_from' => 'updated_by', 'model_to' => '\\Acl\\Model_User', 'key_to' => 'id'],
+        'confirm' => ['key_from' => 'confirm_by', 'model_to' => '\\Acl\\Model_User', 'key_to' => 'id'],
+        'unlock'  => ['key_from' => 'unlocked_by', 'model_to' => '\\Acl\\Model_User', 'key_to' => 'id'],
+    ];
+    protected static $_observers  = [
+        'Orm\\Observer_Self' => ['events' => ['before_insert', 'before_update']],
+    ];
 
     public function _event_before_insert()
     {
